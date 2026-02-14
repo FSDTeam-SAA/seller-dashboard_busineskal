@@ -6,9 +6,6 @@ import Link from 'next/link';
 import { categoryAPI, productAPI, userAPI } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Table,
   TableBody,
@@ -34,13 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import UpdateProduct from './_components/update_product';
 
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
@@ -51,9 +42,19 @@ export default function ProductsPage() {
     price: '',
     stock: '',
     category: '',
+    subcategory: '',
+    country: '',
     sku: '',
     description: '',
   });
+  const [selectedColor, setSelectedColor] = useState('#000000');
+  const [colors, setColors] = useState<string[]>([]);
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
+  const [photosPreview, setPhotosPreview] = useState<string[]>([]);
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const [isCountryOpen, setIsCountryOpen] = useState(false);
   const limit = 10;
   const queryClient = useQueryClient();
 
@@ -67,6 +68,21 @@ export default function ProductsPage() {
     queryKey: ['categories'],
     queryFn: () => categoryAPI.getCategories(),
     select: (response) => response.data.data,
+  });
+
+  const { data: countries, isLoading: isCountriesLoading, isError: isCountriesError } = useQuery({
+    queryKey: ['countries'],
+    queryFn: async () => {
+      const response = await fetch('/api/countries');
+      if (!response.ok) {
+        throw new Error('Failed to load countries');
+      }
+      return response.json();
+    },
+    select: (data) =>
+      Array.isArray(data)
+        ? [...data].sort((a: any, b: any) => (a?.name || '').localeCompare(b?.name || ''))
+        : [],
   });
 
   const { data: productsData, isLoading } = useQuery({
@@ -106,8 +122,23 @@ export default function ProductsPage() {
       fd.append('price', editForm.price);
       fd.append('stock', editForm.stock);
       fd.append('category', editForm.category);
+      if (editForm.subcategory) {
+        fd.append('subcategory', editForm.subcategory);
+      }
+      fd.append('country', editForm.country);
       fd.append('sku', editForm.sku);
       fd.append('detailedDescription', editForm.description);
+      if (colors.length > 0) {
+        fd.append('colors', colors.join(','));
+      }
+
+      if (thumbnail) {
+        fd.append('thumbnail', thumbnail);
+      }
+
+      photos.forEach((photo) => {
+        fd.append('photos', photo);
+      });
 
       return productAPI.updateProduct(editTarget._id, fd);
     },
@@ -124,17 +155,71 @@ export default function ProductsPage() {
   });
 
   useEffect(() => {
-    if (editTarget) {
+    if (!editTarget) {
       setEditForm({
-        title: editTarget.title || '',
-        price: String(editTarget.price ?? ''),
-        stock: String(editTarget.stock ?? ''),
-        category: editTarget.category?._id || editTarget.category || '',
-        sku: editTarget.sku || '',
-        description: editTarget.detailedDescription || editTarget.description || '',
+        title: '',
+        price: '',
+        stock: '',
+        category: '',
+        subcategory: '',
+        country: '',
+        sku: '',
+        description: '',
       });
+      setSelectedColor('#000000');
+      setColors([]);
+      setThumbnail(null);
+      setPhotos([]);
+      setThumbnailPreview('');
+      setPhotosPreview([]);
+      setExistingPhotos([]);
+      setIsCountryOpen(false);
+      return;
     }
-  }, [editTarget]);
+
+    const rawCategoryId = editTarget.category?._id || editTarget.category || '';
+    let categoryId = rawCategoryId;
+    let subcategoryId = '';
+
+    if (categories.length > 0 && rawCategoryId) {
+      const isTop = categories.find((cat: any) => cat._id === rawCategoryId && !cat.parent);
+      if (!isTop) {
+        const parent = categories.find(
+          (cat: any) =>
+            Array.isArray(cat.children) &&
+            cat.children.some((child: any) => child._id === rawCategoryId),
+        );
+        if (parent) {
+          categoryId = parent._id;
+          subcategoryId = rawCategoryId;
+        }
+      }
+    }
+
+    setEditForm({
+      title: editTarget.title || '',
+      price: String(editTarget.price ?? ''),
+      stock: String(editTarget.stock ?? ''),
+      category: categoryId,
+      subcategory: subcategoryId,
+      country: editTarget.country || '',
+      sku: editTarget.sku || '',
+      description: editTarget.detailedDescription || editTarget.description || '',
+    });
+    setColors(
+      Array.isArray(editTarget.colors)
+        ? editTarget.colors.map((c: any) =>
+            typeof c === 'string' ? c.toLowerCase() : c,
+          )
+        : [],
+    );
+    setThumbnailPreview(editTarget.thumbnail || '');
+    setExistingPhotos(
+      Array.isArray(editTarget.photos)
+        ? editTarget.photos.map((p: any) => p?.url).filter(Boolean)
+        : [],
+    );
+  }, [editTarget, categories]);
 
   const handleDeleteConfirm = () => {
     if (deleteTarget?._id) {
@@ -149,13 +234,64 @@ export default function ProductsPage() {
       !editForm.price ||
       !editForm.stock ||
       !editForm.category ||
+      !editForm.country ||
       !editForm.sku
     ) {
       toast.error('Please fill in all required fields');
       return;
     }
+    const selectedCategory = categories.find((cat: any) => cat._id === editForm.category);
+    const subcategories = selectedCategory?.children || [];
+    if (subcategories.length > 0 && !editForm.subcategory) {
+      toast.error('Please select a subcategory');
+      return;
+    }
     updateMutation.mutate();
   };
+
+  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setThumbnail(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setThumbnailPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handlePhotosChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setPhotos((prev) => [...prev, ...files]);
+
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotosPreview((prev) => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPhotosPreview((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const addColor = () => {
+    const normalized = selectedColor.toLowerCase();
+    if (!colors.includes(normalized)) {
+      setColors((prev) => [...prev, normalized]);
+    }
+  };
+
+  const removeColor = (color: string) => {
+    setColors((prev) => prev.filter((c) => c !== color));
+  };
+
+  const selectedCategory = categories.find((cat: any) => cat._id === editForm.category);
+  const subcategories = selectedCategory?.children || [];
 
   return (
     <div className="space-y-6">
@@ -190,9 +326,9 @@ export default function ProductsPage() {
                     <TableHead>Product Name</TableHead>
                     <TableHead>ID</TableHead>
                     <TableHead>Price</TableHead>
-                    <TableHead>Quantity</TableHead>
                     <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>stock</TableHead>
+                    <TableHead>Admin verifiend</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -218,14 +354,14 @@ export default function ProductsPage() {
                       </TableCell>
                       <TableCell>{product.sku}</TableCell>
                       <TableCell>${product.price}</TableCell>
-                      <TableCell>{product.stock} KG/1box</TableCell>
+                      
                       <TableCell className="text-sm">
-                        {new Date(product.createdAt).toLocaleDateString()}{' '}
-                        {new Date(product.createdAt).toLocaleTimeString()}
+                        {new Date(product.createdAt).toLocaleDateString()}
                       </TableCell>
+                      <TableCell>{product.stock}</TableCell>
                       <TableCell>
                         <span className="px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-medium">
-                          {product.status?.replace('_', ' ')}
+                          {product.verified ? 'Verified' : 'Not Verified'}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -319,125 +455,34 @@ export default function ProductsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Product Modal */}
-      <Dialog open={!!editTarget} onOpenChange={() => setEditTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-            <DialogDescription>Update product information</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleEditSave} className="space-y-4">
-            <div>
-              <Label htmlFor="edit-title" className="text-sm font-medium">
-                Title
-              </Label>
-              <Input
-                id="edit-title"
-                value={editForm.title}
-                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                className="mt-2 border-2 border-amber-300"
-                disabled={updateMutation.isPending}
-              />
-            </div>
+      <UpdateProduct
+        open={!!editTarget}
+        onClose={() => setEditTarget(null)}
+        editForm={editForm}
+        setEditForm={setEditForm}
+        updateMutation={updateMutation}
+        handleEditSave={handleEditSave}
+        categories={categories}
+        subcategories={subcategories}
+        isCountryOpen={isCountryOpen}
+        setIsCountryOpen={setIsCountryOpen}
+        countries={countries}
+        isCountriesLoading={isCountriesLoading}
+        isCountriesError={isCountriesError}
+        selectedColor={selectedColor}
+        setSelectedColor={setSelectedColor}
+        colors={colors}
+        addColor={addColor}
+        removeColor={removeColor}
+        handleThumbnailChange={handleThumbnailChange}
+        thumbnailPreview={thumbnailPreview}
+        handlePhotosChange={handlePhotosChange}
+        photosPreview={photosPreview}
+        removePhoto={removePhoto}
+        existingPhotos={existingPhotos}
+      />
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-price" className="text-sm font-medium">
-                  Price
-                </Label>
-                <Input
-                  id="edit-price"
-                  type="number"
-                  value={editForm.price}
-                  onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
-                  className="mt-2 border-2 border-amber-300"
-                  disabled={updateMutation.isPending}
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-stock" className="text-sm font-medium">
-                  Quantity kg / per box
-                </Label>
-                <Input
-                  id="edit-stock"
-                  type="number"
-                  value={editForm.stock}
-                  onChange={(e) => setEditForm({ ...editForm, stock: e.target.value })}
-                  className="mt-2 border-2 border-amber-300"
-                  disabled={updateMutation.isPending}
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="edit-category" className="text-sm font-medium">
-                Category
-              </Label>
-              <Select
-                value={editForm.category}
-                onValueChange={(val) => setEditForm({ ...editForm, category: val })}
-                disabled={updateMutation.isPending}
-              >
-                <SelectTrigger className="border-2 border-amber-300 mt-2">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat: any) => (
-                    <SelectItem key={cat._id} value={cat._id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="edit-sku" className="text-sm font-medium">
-                SKU
-              </Label>
-              <Input
-                id="edit-sku"
-                value={editForm.sku}
-                onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })}
-                className="mt-2 border-2 border-amber-300"
-                disabled={updateMutation.isPending}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="edit-description" className="text-sm font-medium">
-                Description
-              </Label>
-              <Textarea
-                id="edit-description"
-                value={editForm.description}
-                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                className="mt-2 border-2 border-amber-300 resize-none"
-                rows={4}
-                disabled={updateMutation.isPending}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEditTarget(null)}
-                disabled={updateMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                className="bg-amber-600 hover:bg-amber-700 text-white"
-                disabled={updateMutation.isPending}
-              >
-                {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+     
     </div>
   );
 }
