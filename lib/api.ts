@@ -162,8 +162,31 @@ export const shopAPI = {
 export const chatAPI = {
   getMyCustomers: () => apiClient.get('/chat/my-customers'),
   getChatById: (chatId: string) => apiClient.get(`/chat/${chatId}`),
-  sendMessage: (chatId: string, message: string) =>
-    apiClient.post('/chat/message', { chatId, message }),
+  sendMessage: (
+    chatId: string,
+    message: string,
+    files?: File[],
+    options?: { askPrice?: boolean; productId?: string }
+  ) => {
+    if (files && files.length > 0) {
+      const fd = new FormData();
+      fd.append('chatId', chatId);
+      if (message) fd.append('message', message);
+      if (options?.askPrice !== undefined) fd.append('askPrice', String(options.askPrice));
+      if (options?.productId) fd.append('productId', options.productId);
+      files.forEach((file) => fd.append('files', file));
+      return apiClient.post('/chat/message', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+    }
+
+    return apiClient.post('/chat/message', {
+      chatId,
+      message,
+      askPrice: options?.askPrice,
+      productId: options?.productId,
+    });
+  },
 };
 
 // Payment API endpoints

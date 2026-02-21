@@ -33,6 +33,11 @@ import {
 } from '@/components/ui/dialog';
 import UpdateProduct from './_components/update_product';
 
+type ExistingPhoto = {
+  url: string;
+  public_id?: string;
+};
+
 export default function ProductsPage() {
   const [page, setPage] = useState(1);
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
@@ -53,7 +58,9 @@ export default function ProductsPage() {
   const [photos, setPhotos] = useState<File[]>([]);
   const [thumbnailPreview, setThumbnailPreview] = useState<string>('');
   const [photosPreview, setPhotosPreview] = useState<string[]>([]);
-  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const [existingPhotos, setExistingPhotos] = useState<ExistingPhoto[]>([]);
+  const [removedPhotos, setRemovedPhotos] = useState<string[]>([]);
+  const [removeThumbnail, setRemoveThumbnail] = useState(false);
   const [isCountryOpen, setIsCountryOpen] = useState(false);
   const limit = 10;
   const queryClient = useQueryClient();
@@ -140,6 +147,14 @@ export default function ProductsPage() {
         fd.append('photos', photo);
       });
 
+      if (removedPhotos.length > 0) {
+        fd.append('removedPhotos', JSON.stringify(removedPhotos));
+      }
+
+      if (removeThumbnail) {
+        fd.append('removeThumbnail', 'true');
+      }
+
       return productAPI.updateProduct(editTarget._id, fd);
     },
     onSuccess: () => {
@@ -173,6 +188,8 @@ export default function ProductsPage() {
       setThumbnailPreview('');
       setPhotosPreview([]);
       setExistingPhotos([]);
+      setRemovedPhotos([]);
+      setRemoveThumbnail(false);
       setIsCountryOpen(false);
       return;
     }
@@ -216,9 +233,13 @@ export default function ProductsPage() {
     setThumbnailPreview(editTarget.thumbnail || '');
     setExistingPhotos(
       Array.isArray(editTarget.photos)
-        ? editTarget.photos.map((p: any) => p?.url).filter(Boolean)
+        ? editTarget.photos
+            .map((p: any) => ({ url: p?.url, public_id: p?.public_id }))
+            .filter((p: ExistingPhoto) => p.url)
         : [],
     );
+    setRemovedPhotos([]);
+    setRemoveThumbnail(false);
   }, [editTarget, categories]);
 
   const handleDeleteConfirm = () => {
@@ -253,6 +274,7 @@ export default function ProductsPage() {
     const file = e.target.files?.[0];
     if (file) {
       setThumbnail(file);
+      setRemoveThumbnail(false);
       const reader = new FileReader();
       reader.onloadend = () => {
         setThumbnailPreview(reader.result as string);
@@ -277,6 +299,29 @@ export default function ProductsPage() {
   const removePhoto = (index: number) => {
     setPhotos((prev) => prev.filter((_, i) => i !== index));
     setPhotosPreview((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingPhoto = (index: number) => {
+    setExistingPhotos((prev) => {
+      const removed = prev[index];
+      if (removed?.public_id) {
+        setRemovedPhotos((ids) =>
+          ids.includes(removed.public_id) ? ids : [...ids, removed.public_id],
+        );
+      } else if (removed?.url) {
+        setRemovedPhotos((ids) =>
+          ids.includes(removed.url) ? ids : [...ids, removed.url],
+        );
+      }
+
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const handleRemoveThumbnail = () => {
+    setThumbnail(null);
+    setThumbnailPreview('');
+    setRemoveThumbnail(true);
   };
 
   const addColor = () => {
@@ -475,10 +520,12 @@ export default function ProductsPage() {
         addColor={addColor}
         removeColor={removeColor}
         handleThumbnailChange={handleThumbnailChange}
+        removeThumbnail={handleRemoveThumbnail}
         thumbnailPreview={thumbnailPreview}
         handlePhotosChange={handlePhotosChange}
         photosPreview={photosPreview}
         removePhoto={removePhoto}
+        removeExistingPhoto={removeExistingPhoto}
         existingPhotos={existingPhotos}
       />
 

@@ -1,26 +1,30 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
+import React from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Command,
   CommandEmpty,
@@ -28,8 +32,8 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
-import { Check, ChevronsUpDown, Upload, X } from 'lucide-react';
+} from "@/components/ui/command";
+import { Check, ChevronsUpDown, Upload, X } from "lucide-react";
 
 type EditForm = {
   title: string;
@@ -40,6 +44,11 @@ type EditForm = {
   country: string;
   sku: string;
   description: string;
+};
+
+type ExistingPhoto = {
+  url: string;
+  public_id?: string;
 };
 
 type UpdateProductProps = {
@@ -62,11 +71,13 @@ type UpdateProductProps = {
   addColor: () => void;
   removeColor: (color: string) => void;
   handleThumbnailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  removeThumbnail: () => void;
   thumbnailPreview: string;
   handlePhotosChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   photosPreview: string[];
   removePhoto: (index: number) => void;
-  existingPhotos: string[];
+  removeExistingPhoto: (index: number) => void;
+  existingPhotos: ExistingPhoto[];
 };
 
 export default function UpdateProduct({
@@ -91,6 +102,8 @@ export default function UpdateProduct({
   handleThumbnailChange,
   thumbnailPreview,
   handlePhotosChange,
+  removeThumbnail,
+  removeExistingPhoto,
   photosPreview,
   removePhoto,
   existingPhotos,
@@ -119,7 +132,9 @@ export default function UpdateProduct({
                 <Input
                   id="edit-title"
                   value={editForm.title}
-                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, title: e.target.value })
+                  }
                   className="mt-2 border-2 border-amber-300"
                   disabled={updateMutation.isPending}
                 />
@@ -134,7 +149,9 @@ export default function UpdateProduct({
                   id="edit-price"
                   type="number"
                   value={editForm.price}
-                  onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, price: e.target.value })
+                  }
                   className="mt-2 border-2 border-amber-300"
                   disabled={updateMutation.isPending}
                 />
@@ -149,7 +166,9 @@ export default function UpdateProduct({
                   id="edit-stock"
                   type="number"
                   value={editForm.stock}
-                  onChange={(e) => setEditForm({ ...editForm, stock: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, stock: e.target.value })
+                  }
                   className="mt-2 border-2 border-amber-300"
                   disabled={updateMutation.isPending}
                 />
@@ -161,7 +180,7 @@ export default function UpdateProduct({
                 <Select
                   value={editForm.category}
                   onValueChange={(val) =>
-                    setEditForm({ ...editForm, category: val, subcategory: '' })
+                    setEditForm({ ...editForm, category: val, subcategory: "" })
                   }
                   disabled={updateMutation.isPending}
                 >
@@ -185,19 +204,23 @@ export default function UpdateProduct({
                 <Label className="text-sm font-medium">Subcategory</Label>
                 <Select
                   value={editForm.subcategory}
-                  onValueChange={(val) => setEditForm({ ...editForm, subcategory: val })}
+                  onValueChange={(val) =>
+                    setEditForm({ ...editForm, subcategory: val })
+                  }
                   disabled={
-                    updateMutation.isPending || !editForm.category || subcategories.length === 0
+                    updateMutation.isPending ||
+                    !editForm.category ||
+                    subcategories.length === 0
                   }
                 >
                   <SelectTrigger className="border-2 border-amber-300 mt-2">
                     <SelectValue
                       placeholder={
                         !editForm.category
-                          ? 'Select a category first'
+                          ? "Select a category first"
                           : subcategories.length === 0
-                            ? 'No subcategories'
-                            : 'Select a subcategory'
+                            ? "No subcategories"
+                            : "Select a subcategory"
                       }
                     />
                   </SelectTrigger>
@@ -222,12 +245,12 @@ export default function UpdateProduct({
                       role="combobox"
                       aria-expanded={isCountryOpen}
                       className={cn(
-                        'w-full justify-between border-2 border-amber-300 mt-2 bg-white',
-                        !editForm.country && 'text-slate-500',
+                        "w-full justify-between border-2 border-amber-300 mt-2 bg-white",
+                        !editForm.country && "text-slate-500",
                       )}
                       disabled={updateMutation.isPending}
                     >
-                      {editForm.country || 'Select a country'}
+                      {editForm.country || "Select a country"}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
@@ -235,8 +258,12 @@ export default function UpdateProduct({
                     <Command>
                       <CommandInput placeholder="Search country..." />
                       <CommandList>
-                        {isCountriesLoading && <CommandEmpty>Loading countries...</CommandEmpty>}
-                        {isCountriesError && <CommandEmpty>Failed to load countries</CommandEmpty>}
+                        {isCountriesLoading && (
+                          <CommandEmpty>Loading countries...</CommandEmpty>
+                        )}
+                        {isCountriesError && (
+                          <CommandEmpty>Failed to load countries</CommandEmpty>
+                        )}
                         {!isCountriesLoading && !isCountriesError && (
                           <>
                             <CommandEmpty>No country found.</CommandEmpty>
@@ -246,16 +273,19 @@ export default function UpdateProduct({
                                   key={country.alpha2Code || country.name}
                                   value={country.name}
                                   onSelect={() => {
-                                    setEditForm({ ...editForm, country: country.name });
+                                    setEditForm({
+                                      ...editForm,
+                                      country: country.name,
+                                    });
                                     setIsCountryOpen(false);
                                   }}
                                 >
                                   <Check
                                     className={cn(
-                                      'mr-2 h-4 w-4',
+                                      "mr-2 h-4 w-4",
                                       editForm.country === country.name
-                                        ? 'opacity-100'
-                                        : 'opacity-0',
+                                        ? "opacity-100"
+                                        : "opacity-0",
                                     )}
                                   />
                                   {country.name}
@@ -275,7 +305,9 @@ export default function UpdateProduct({
                 <Label className="text-sm font-medium">SKU</Label>
                 <Input
                   value={editForm.sku}
-                  onChange={(e) => setEditForm({ ...editForm, sku: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, sku: e.target.value })
+                  }
                   className="mt-2 border-2 border-amber-300"
                   disabled={updateMutation.isPending}
                 />
@@ -334,7 +366,9 @@ export default function UpdateProduct({
                 <Label className="text-sm font-medium">Description</Label>
                 <Textarea
                   value={editForm.description}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, description: e.target.value })
+                  }
                   className="mt-2 border-2 border-amber-300 resize-none"
                   rows={4}
                   disabled={updateMutation.isPending}
@@ -357,19 +391,31 @@ export default function UpdateProduct({
                 </label>
 
                 {thumbnailPreview && (
-                  <div className="mt-4 rounded-lg border overflow-hidden">
+                  <div className="mt-4 relative rounded-lg border overflow-hidden bg-white">
                     <img
-                      src={thumbnailPreview || '/placeholder.svg'}
+                      src={thumbnailPreview || "/placeholder.svg"}
                       alt="Thumbnail preview"
                       className="w-full max-h-[260px] object-contain bg-white"
                     />
+
+                    {/* ✅ Close icon */}
+                    <button
+                      type="button"
+                      onClick={removeThumbnail}
+                      className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded"
+                      disabled={updateMutation.isPending}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 )}
               </div>
 
               {/* More Images */}
               <div className="md:col-span-2">
-                <Label className="text-sm font-medium">Upload more picture/video</Label>
+                <Label className="text-sm font-medium">
+                  Upload more picture/video
+                </Label>
                 <label className="mt-2 flex flex-col items-center justify-center border-2 border-dashed border-amber-300 rounded-lg p-6 cursor-pointer hover:border-amber-600">
                   <Upload className="w-8 h-8 text-amber-600 mb-2" />
                   <span className="text-sm text-slate-600">Upload images</span>
@@ -386,9 +432,12 @@ export default function UpdateProduct({
                 {photosPreview.length > 0 && (
                   <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
                     {photosPreview.map((preview, idx) => (
-                      <div key={idx} className="relative rounded-lg border overflow-hidden bg-white">
+                      <div
+                        key={idx}
+                        className="relative rounded-lg border overflow-hidden bg-white"
+                      >
                         <img
-                          src={preview || '/placeholder.svg'}
+                          src={preview || "/placeholder.svg"}
                           alt={`Photo ${idx}`}
                           className="w-full h-36 object-cover"
                         />
@@ -407,15 +456,30 @@ export default function UpdateProduct({
 
                 {existingPhotos.length > 0 && (
                   <div className="mt-4">
-                    <Label className="text-sm font-medium">Current photos</Label>
+                    <Label className="text-sm font-medium">
+                      Current photos
+                    </Label>
                     <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {existingPhotos.map((url, idx) => (
-                        <div key={`${url}-${idx}`} className="rounded-lg border overflow-hidden bg-white">
+                    {existingPhotos.map((photo, idx) => (
+                      <div
+                          key={`${photo.public_id || photo.url}-${idx}`}
+                          className="relative rounded-lg border overflow-hidden bg-white"
+                        >
                           <img
-                            src={url || '/placeholder.svg'}
+                            src={photo.url || "/placeholder.svg"}
                             alt={`Existing photo ${idx + 1}`}
                             className="w-full h-36 object-cover"
                           />
+
+                          {/* ✅ Close icon */}
+                          <button
+                            type="button"
+                            onClick={() => removeExistingPhoto(idx)}
+                            className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded"
+                            disabled={updateMutation.isPending}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -428,7 +492,12 @@ export default function UpdateProduct({
 
         {/* ✅ Sticky footer */}
         <div className="border-t p-4 flex justify-end gap-2 bg-white">
-          <Button type="button" variant="outline" onClick={onClose} disabled={updateMutation.isPending}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={updateMutation.isPending}
+          >
             Cancel
           </Button>
           <Button
@@ -438,11 +507,13 @@ export default function UpdateProduct({
             disabled={updateMutation.isPending}
             onClick={(e) => {
               // trigger same form submit
-              const form = (e.currentTarget.ownerDocument || document).querySelector('form');
+              const form = (
+                e.currentTarget.ownerDocument || document
+              ).querySelector("form");
               form?.requestSubmit();
             }}
           >
-            {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
+            {updateMutation.isPending ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </DialogContent>
