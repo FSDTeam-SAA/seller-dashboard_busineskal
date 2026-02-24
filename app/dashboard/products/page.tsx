@@ -341,13 +341,13 @@ export default function ProductsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold">Active Product List</h1>
+          <h1 className="text-2xl font-bold sm:text-3xl">Active Product List</h1>
           <p className="text-slate-500 mt-1">Dashboard &gt; Active Product</p>
         </div>
         <Link href="/dashboard/products/add">
-          <Button className="bg-amber-600 hover:bg-amber-700 text-white">
+          <Button className="w-full bg-amber-600 text-white hover:bg-amber-700 sm:w-auto">
             <Plus className="w-5 h-5 mr-2" />
             Add Product
           </Button>
@@ -365,7 +365,7 @@ export default function ProductsPage() {
             <TableSkeleton rows={10} columns={7} />
           ) : products.length > 0 ? (
             <div className="overflow-x-auto">
-              <Table>
+              <Table className="min-w-[920px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Product Name</TableHead>
@@ -451,7 +451,7 @@ export default function ProductsPage() {
 
       {/* Pagination - simplified */}
       {products.length > 0 && (
-        <div className="flex items-center justify-center gap-2 mt-6">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
           <Button
             variant="outline"
             onClick={() => setPage(Math.max(1, page - 1))}
@@ -481,7 +481,7 @@ export default function ProductsPage() {
               cannot be undone.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex justify-end gap-2 pt-4">
+          <div className="flex flex-col justify-end gap-2 pt-4 sm:flex-row">
             <Button
               variant="outline"
               onClick={() => setDeleteTarget(null)}

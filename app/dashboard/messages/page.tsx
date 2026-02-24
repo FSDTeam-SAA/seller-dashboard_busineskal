@@ -244,7 +244,7 @@ export default function MessagesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Messages</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">Messages</h1>
         <p className="text-slate-500 mt-1">Dashboard &gt; Messages</p>
       </div>
 
@@ -290,7 +290,7 @@ export default function MessagesPage() {
         {/* Chat Panel */}
         <Card className="lg:col-span-2">
           <CardHeader>
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-start">
               <div>
                 <CardTitle>Chat</CardTitle>
                 <CardDescription>
@@ -332,7 +332,7 @@ export default function MessagesPage() {
               </div>
             ) : activeChat ? (
               <div className="flex flex-col gap-4">
-                <div className="h-80 overflow-y-auto space-y-3 border rounded-lg p-4 bg-slate-50">
+                <div className="h-[60vh] max-h-80 overflow-y-auto space-y-3 border rounded-lg p-4 bg-slate-50">
                   {activeMessages.length > 0 ? (
                     activeMessages.map((msg: any) => {
                       const isMe = msg.user?._id === myUserId;
@@ -342,7 +342,7 @@ export default function MessagesPage() {
                           className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-[70%] rounded-lg px-3 py-2 text-sm ${
+                            className={`max-w-[85%] rounded-lg px-3 py-2 text-sm sm:max-w-[70%] ${
                               isMe
                                 ? 'bg-amber-600 text-white'
                                 : 'bg-white border text-slate-800'
@@ -392,7 +392,7 @@ export default function MessagesPage() {
                     </div>
                   )}
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <label className="inline-flex items-center rounded border border-slate-200 bg-white px-3 text-sm text-slate-700 hover:border-amber-300">
                       <input
                         type="file"
@@ -418,7 +418,7 @@ export default function MessagesPage() {
                     />
                     <Button
                       onClick={handleSend}
-                      className="bg-amber-600 hover:bg-amber-700 text-white"
+                      className="w-full bg-amber-600 text-white hover:bg-amber-700 sm:w-auto"
                       disabled={sendMessageMutation.isPending}
                     >
                       {sendMessageMutation.isPending ? 'Sending...' : 'Send'}

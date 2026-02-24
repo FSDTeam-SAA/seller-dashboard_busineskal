@@ -96,10 +96,10 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Sell Report Chart */}
         <Card className="lg:col-span-2 border-none shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <div>
               <CardTitle className="text-lg font-bold">Sell Report</CardTitle>
-              <div className="flex gap-4 mt-2 text-xs font-medium text-gray-500">
+              <div className="mt-2 flex flex-wrap gap-3 text-xs font-medium text-gray-500">
                 <div className="flex items-center gap-1">
                   <div className="w-2 h-2 rounded-full bg-[#22C55E]" /> This Month
                 </div>
@@ -108,12 +108,12 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="flex bg-[#E5E7EB] p-1 rounded-lg">
+            <div className="flex flex-wrap rounded-lg bg-[#E5E7EB] p-1">
               {['Day', 'Week', 'Month', 'Year'].map((p) => (
                 <button
                   key={p}
                   onClick={() => setPeriod(p.toLowerCase() as any)}
-                  className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${
+                  className={`rounded-md px-3 py-1.5 text-xs font-bold transition-all ${
                     period === p.toLowerCase() ? 'bg-[#D99B29] text-white' : 'text-gray-500'
                   }`}
                 >
@@ -151,7 +151,7 @@ export default function DashboardPage() {
 
         {/* Radial Progress Chart */}
         <Card className="border-none shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
             <CardTitle className="text-lg font-bold">Total New Products Report</CardTitle>
             <div className="flex flex-col gap-1 text-[10px] font-bold">
               <div className="flex items-center gap-1 text-[#4E43FF]">● This day</div>
@@ -160,7 +160,7 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="flex flex-col items-center">
-            <div className="flex bg-[#E5E7EB] p-1 rounded-lg self-end mb-4">
+            <div className="mb-4 flex flex-wrap self-start rounded-lg bg-[#E5E7EB] p-1 sm:self-end">
               {['Day', 'Week', 'Month', 'Year'].map((p) => (
                 <button key={p} className={`px-3 py-1 text-[10px] font-bold rounded-md ${p === 'Month' ? 'bg-[#D99B29] text-white' : 'text-gray-400'}`}>
                   {p}

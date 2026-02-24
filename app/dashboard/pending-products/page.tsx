@@ -6,7 +6,7 @@ export default function PendingProductsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Pending Product List</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">Pending Product List</h1>
         <p className="text-slate-500 mt-1">Dashboard &gt; Pending Product &gt; List</p>
       </div>
 

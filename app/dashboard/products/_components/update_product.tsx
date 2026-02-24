@@ -111,7 +111,7 @@ export default function UpdateProduct({
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       {/* ✅ Fixed: max height + scroll */}
-      <DialogContent className="sm:max-w-5xl p-0 overflow-hidden">
+      <DialogContent className="w-[calc(100%-1rem)] max-h-[90vh] p-0 overflow-hidden sm:max-w-5xl">
         <div className="p-6 border-b">
           <DialogHeader>
             <DialogTitle>Edit Product</DialogTitle>
@@ -121,7 +121,7 @@ export default function UpdateProduct({
 
         {/* ✅ scroll area */}
         <div className="max-h-[70vh] overflow-y-auto p-6">
-          <form onSubmit={handleEditSave} className="space-y-6">
+          <form id="__update_product_form__" onSubmit={handleEditSave} className="space-y-6">
             {/* ✅ Fixed: 2-column layout */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Title */}
@@ -491,7 +491,7 @@ export default function UpdateProduct({
         </div>
 
         {/* ✅ Sticky footer */}
-        <div className="border-t p-4 flex justify-end gap-2 bg-white">
+        <div className="border-t bg-white p-4 flex flex-col-reverse justify-end gap-2 sm:flex-row">
           <Button
             type="button"
             variant="outline"
@@ -505,13 +505,6 @@ export default function UpdateProduct({
             form="__update_product_form__"
             className="bg-amber-600 hover:bg-amber-700 text-white"
             disabled={updateMutation.isPending}
-            onClick={(e) => {
-              // trigger same form submit
-              const form = (
-                e.currentTarget.ownerDocument || document
-              ).querySelector("form");
-              form?.requestSubmit();
-            }}
           >
             {updateMutation.isPending ? "Saving..." : "Save Changes"}
           </Button>

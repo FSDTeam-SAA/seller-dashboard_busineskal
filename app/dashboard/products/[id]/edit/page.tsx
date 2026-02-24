@@ -137,7 +137,7 @@ export default function EditProductPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Edit Product</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">Edit Product</h1>
         <p className="text-slate-500 mt-1">Dashboard &gt; Product &gt; Edit Product</p>
       </div>
 
@@ -173,7 +173,7 @@ export default function EditProductPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <Label htmlFor="price" className="text-sm font-medium">
                         Price
@@ -274,7 +274,7 @@ export default function EditProductPage() {
                     <CardTitle className="text-base">Existing Photos</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                       {productData.photos.map((photo: any) => (
                         <img
                           key={photo.public_id || photo.url}
@@ -308,7 +308,7 @@ export default function EditProductPage() {
                   </label>
 
                   {photosPreview.length > 0 && (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                       {photosPreview.map((preview, idx) => (
                         <div key={idx} className="relative">
                           <img
@@ -336,7 +336,7 @@ export default function EditProductPage() {
             <Button
               type="submit"
               disabled={updateProductMutation.isPending}
-              className="bg-amber-600 hover:bg-amber-700 text-white px-8"
+              className="w-full bg-amber-600 px-8 text-white hover:bg-amber-700 sm:w-auto"
             >
               {updateProductMutation.isPending ? 'Saving...' : 'Save Changes'}
             </Button>

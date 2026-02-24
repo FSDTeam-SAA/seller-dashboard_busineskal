@@ -61,12 +61,12 @@ export default function ShopPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">My Shop</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">My Shop</h1>
         <p className="text-slate-500 mt-1">Dashboard &gt; My Shop</p>
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div>
             <CardTitle>Shop Information</CardTitle>
             <CardDescription>Update your shop profile details</CardDescription>
@@ -135,7 +135,7 @@ export default function ShopPage() {
                 <Button
                   type="submit"
                   disabled={updateShopMutation.isPending}
-                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                  className="w-full bg-amber-600 text-white hover:bg-amber-700 sm:w-auto"
                 >
                   {updateShopMutation.isPending ? 'Saving...' : 'Save Changes'}
                 </Button>

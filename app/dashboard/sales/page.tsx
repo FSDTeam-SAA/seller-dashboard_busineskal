@@ -32,7 +32,7 @@ export default function SalesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">My Sales</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">My Sales</h1>
         <p className="text-slate-500 mt-1">Dashboard &gt; Sales</p>
       </div>
 
@@ -59,7 +59,7 @@ export default function SalesPage() {
             <TableSkeleton rows={10} columns={6} />
           ) : sales.length > 0 ? (
             <div className="overflow-x-auto">
-              <Table>
+            <Table className="min-w-[760px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Order ID</TableHead>
@@ -96,7 +96,7 @@ export default function SalesPage() {
 
       {/* Pagination */}
       {sales.length > 0 && (
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           <Button
             variant="outline"
             onClick={() => setPage(Math.max(1, page - 1))}

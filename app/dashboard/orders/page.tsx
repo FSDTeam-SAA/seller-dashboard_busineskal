@@ -181,7 +181,7 @@ export default function OrdersPage() {
 
       {/* Status Filter */}
       <Card className="border border-[#ede7dd] bg-[#faf8f5]">
-        <CardHeader className="flex flex-row items-center justify-between gap-4 border-b border-[#efe7dd] py-4">
+        <CardHeader className="flex flex-col items-start justify-between gap-4 border-b border-[#efe7dd] py-4 sm:flex-row sm:items-center">
           <div>
             <CardTitle className="text-base font-semibold text-[#3a342f]">
               Sales History
@@ -194,7 +194,7 @@ export default function OrdersPage() {
               setPage(1);
             }}
           >
-            <SelectTrigger className="w-44 border-[#e5dbcf] bg-white text-sm">
+            <SelectTrigger className="w-full border-[#e5dbcf] bg-white text-sm sm:w-44">
               <SelectValue placeholder="Filter status" />
             </SelectTrigger>
             <SelectContent>
@@ -336,7 +336,7 @@ export default function OrdersPage() {
           <span className="text-sm text-[#6f6963]">
             Showing {startIndex} to {endIndex} of {totalItems} results
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => setPage(Math.max(1, resolvedPage - 1))}
@@ -441,7 +441,7 @@ export default function OrdersPage() {
               </div>
             )}
 
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex flex-col justify-end gap-2 pt-4 sm:flex-row">
               <Button
                 variant="outline"
                 onClick={() => setShowStatusDialog(false)}

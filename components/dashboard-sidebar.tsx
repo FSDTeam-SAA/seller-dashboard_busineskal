@@ -13,7 +13,6 @@ import {
   Store,
   Settings,
   LogOut,
-  Menu,
   X,
 } from 'lucide-react';
 import { useState } from 'react';
@@ -39,10 +38,14 @@ const menuItems = [
   { icon: Settings, label: 'Settings', href: '/dashboard/settings' },
 ];
 
-export function DashboardSidebar() {
+type DashboardSidebarProps = {
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+export function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const confirmLogout = () => {
@@ -64,7 +67,7 @@ export function DashboardSidebar() {
             className={`flex items-center gap-4 px-6 py-4 transition-all ${
               isActive ? 'bg-[#8B5E02] text-white' : 'text-white hover:bg-[#8B5E02]/30'
             }`}
-            onClick={() => setMobileOpen(false)}
+            onClick={onClose}
           >
             <Icon className="w-6 h-6" />
             <span className="text-lg">{item.label}</span>
@@ -76,10 +79,30 @@ export function DashboardSidebar() {
 
   return (
     <>
-      {/* Sidebar logic remains same */}
-      <aside className={`fixed left-0 top-0 h-screen w-72 bg-[#E6910B] text-white flex flex-col z-40 transition-transform ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="py-10 flex justify-center">
+      {isOpen ? (
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={onClose}
+        />
+      ) : null}
+
+      <aside
+        className={`fixed left-0 top-0 z-40 flex h-screen w-72 flex-col bg-[#E6910B] text-white transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0`}
+      >
+        <div className="flex items-center justify-between px-4 py-8 md:justify-center md:px-0 md:py-10">
           <Image src="/logo.png" alt="MANSA" width={100} height={100} className="w-20 h-auto" />
+          <button
+            type="button"
+            className="rounded-md p-2 text-white/90 hover:bg-white/10 md:hidden"
+            onClick={onClose}
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
 
         <nav className="flex-1 overflow-y-auto"><NavLinks /></nav>
@@ -123,8 +146,6 @@ export function DashboardSidebar() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <div className="lg:ml-72" />
     </>
   );
 }

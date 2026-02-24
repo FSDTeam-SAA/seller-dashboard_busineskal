@@ -151,7 +151,7 @@ function PaymentForm({
           />
         </div>
       </div>
-      <div className="flex justify-end gap-2">
+      <div className="flex flex-col justify-end gap-2 sm:flex-row">
         <Button
           type="button"
           variant="outline"
@@ -260,14 +260,14 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
+          <h1 className="text-2xl font-bold sm:text-3xl">Settings</h1>
           <p className="text-slate-500 mt-1">Dashboard &gt; Settings</p>
         </div>
         <div>
           <Button
-            className="bg-amber-600 hover:bg-amber-700 text-white"
+            className="w-full bg-amber-600 text-white hover:bg-amber-700 sm:w-auto"
             onClick={() => setChangePasswordOpen(true)}
           >
             Change Password
@@ -280,7 +280,7 @@ export default function SettingsPage() {
         open={changePasswordOpen}
         onOpenChange={setChangePasswordOpen}
       >
-        <DialogContent>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
             <DialogDescription>Update your account password</DialogDescription>
@@ -331,7 +331,7 @@ export default function SettingsPage() {
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex flex-col justify-end gap-2 pt-2 sm:flex-row">
               <Button
                 type="button"
                 variant="outline"
@@ -397,7 +397,7 @@ export default function SettingsPage() {
                   )}
                   <Button
                     onClick={() => openPayment(plan)}
-                    className="bg-amber-600 hover:bg-amber-700 text-white"
+                    className="w-full bg-amber-600 text-white hover:bg-amber-700"
                   >
                     Upgrade Plan
                   </Button>
@@ -414,14 +414,14 @@ export default function SettingsPage() {
 
       {/* Payment Dialog */}
       <Dialog open={!!selectedPlan} onOpenChange={closePayment}>
-        <DialogContent>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Complete Payment</DialogTitle>
             <DialogDescription>Pay securely using Stripe</DialogDescription>
           </DialogHeader>
           {selectedPlan ? (
             <div className="space-y-4">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
                   variant={billingPeriod === "monthly" ? "default" : "outline"}

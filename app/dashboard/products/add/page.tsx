@@ -194,7 +194,7 @@ export default function AddProductPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Add Product</h1>
+        <h1 className="text-2xl font-bold sm:text-3xl">Add Product</h1>
         <p className="text-slate-500 mt-1">Dashboard &gt; Product &gt; Add Product</p>
       </div>
 
@@ -221,7 +221,7 @@ export default function AddProductPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <Label htmlFor="price" className="text-sm font-medium">
                       Price
@@ -509,7 +509,7 @@ export default function AddProductPage() {
                 </label>
 
                 {photosPreview.length > 0 && (
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     {photosPreview.map((preview, idx) => (
                       <div key={idx} className="relative">
                         <img
@@ -548,7 +548,7 @@ export default function AddProductPage() {
           <Button
             type="submit"
             disabled={addProductMutation.isPending}
-            className="bg-amber-600 hover:bg-amber-700 text-white px-8"
+            className="w-full bg-amber-600 px-8 text-white hover:bg-amber-700 sm:w-auto"
           >
             {addProductMutation.isPending ? 'Publishing...' : 'Publish Product'}
           </Button>
